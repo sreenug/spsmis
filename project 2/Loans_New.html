@@ -1,0 +1,124 @@
+<html>
+<head>
+<title>SHG Pragram Monitoring & Evaluation - Home Page</title>
+<script type="text/javascript" src="monthDisbursed.js" charset="utf-8"></script>
+<script type="text/javascript" src="monthOutstanding.js" charset="utf-8"></script>
+<script type="text/javascript" src="monthMain.js" charset="utf-8"></script>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+<script src="http://www.macwright.org/simple-statistics/simple_statistics.js"></script>
+<script type="text/javascript" src="http://ils.unc.edu/courses/2014_fall/inls690_224/js/simple_statistics.js" charset="utf-8"></script>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<style>
+		#textContent{
+			margin-left: 650;
+			margin-top:-200;	 
+		}
+		#main_wrapper, #top_nav{
+			background: #ffffff;
+			width:90%;
+			margin:auto;
+			box-shadow:0 0 15px rgba(0, 0, 0, 0.25);
+			padding-top: 30px;
+		}
+		#loan_container{
+			margin-top : 50;
+			margin-left :10;
+		}
+		#loan_container,#loan_container_new{
+			height:300;
+		}
+</style>	
+	<header id="top_nav">
+		<h1> SHG Analytics Dashboard - Loans</h1>
+	</header>
+	<div id="main_wrapper">
+		<span id ="dropdown_selection">
+			<b>Select an option :</b>
+			<select id = "selection" onchange="selectOptionLoan();">
+				<option value="disbursed">Loan Disbursed</option>
+				<option value="outstanding">Loan Outstanding</option>
+			</select>
+		</span>
+		<span id ="dropdown">
+			<b>Select a month :</b>
+			<select id = "month_dropdown" onchange="selectOptionLoan();">
+				<option value="All">-All-</option>
+				<option value="4">April</option>
+				<option value="5">May</option>
+				<option value="6">June</option>
+				<option value="7">July</option>
+			</select>
+		</span>
+		<span id="vis" style="display:block"></span>
+		<span id="loan_container" style="display:block">
+			<h3 style="visibility:hidden">Group Data</h3>
+		</span>
+		<span id="loan_container_new" style="display:block">
+			<h3 style="visibility:hidden">Member Data</h3>
+		</span>
+	</div>
+		<script>
+		height = 150;
+		width = 150;
+		svg_height = 200;
+		svg_width = 200;
+		line_height = 300;
+		line_width = 300;
+		margin = {top: 30, right: 20, bottom: 30, left: 50},
+		widthmonth = line_width - margin.left - margin.right,
+		heightmonth = line_height - margin.top - margin.bottom;
+
+		color = d3.scale.ordinal()
+				      .domain(["Udainagar", "Kantaphod", "Bagli","Barwah","Dewas","Khategaon","Hatpipliya","Maheshwar","Kannod"])
+				      .range(["#00441B", "##E5f5E0" , "#C7E9C0", "#A1D99B","#74C476","#41AB5D","#238B45","#006D2C","#00441B"]);
+
+		monthColor = d3.scale.category10();
+		
+
+		d3.json('loans.json', function(error,datajson){
+			if(error != null){
+				alert ("There is an error fetching the data : " +error);
+			}
+			else{
+				month_data = datajson;
+				monthdata_filter = month_data.filter(function(d){return d.month == 7;});
+				monthmain("disbursed");
+			}
+		});
+
+			function selectOptionLoan(){
+				var dropdown_month = document.getElementById("month_dropdown").value;
+				var dropdown_selection = document.getElementById("selection").value;
+				if(dropdown_selection == "disbursed"){
+					if(dropdown_month == "All"){
+						document.getElementById("loan_container").querySelector("h3").style.visibility = "hidden";
+						document.getElementById("loan_container_new").querySelector("h3").style.visibility = "hidden";
+						monthmain(dropdown_selection);
+					}
+					else{
+						document.getElementById("loan_container").querySelector("h3").style.visibility = "visible";
+						document.getElementById("loan_container_new").querySelector("h3").style.visibility = "visible";
+						monthDataDisbursed(dropdown_month);
+						console.log(dropdown_month);
+					}
+				}
+				else{
+					if(dropdown_month == "All"){
+						document.getElementById("loan_container").querySelector("h3").style.visibility = "hidden";
+						document.getElementById("loan_container_new").querySelector("h3").style.visibility = "hidden";
+						monthmain(dropdown_selection);	
+					}
+					else{
+						document.getElementById("loan_container").querySelector("h3").style.visibility = "visible";
+						document.getElementById("loan_container_new").querySelector("h3").style.visibility = "visible";
+						monthDataOutstanding(dropdown_month);
+						console.log(dropdown_month);
+					}
+				}
+			}
+			
+		</script>
+</body>

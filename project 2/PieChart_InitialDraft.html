@@ -1,0 +1,120 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Pie Chart - Region Wise Distribution</title>
+		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		<style type="text/css">
+
+			text {
+				font-family: sans-serif;
+				font-size: 12px;
+				fill: white;
+			}
+
+		</style>
+	</head>
+	<body>
+		<body>
+			<h1 style="text-align:center">Region Wise Distribution of SHGs</h1>
+			<div id="vis_container" style="text-align:center"></div>
+			<div id="details"></div>
+</body>
+		<script type="text/javascript">
+
+		/*var data = [{region:"Udainagar",SHG:260,Active:255,Inactive:5},
+					{region:"Kantaphod",SHG:247,Active:245,Inactive:2},
+					{region:"Bagli",SHG:269,Active:264,Inactive:5},
+					{region:"Barwah",SHG:257,Active:239,Inactive:18},
+					{region:"Dewas",SHG:256,Active:249,Inactive:7},
+					{region:"Hatpipliya",SHG:220,Active:219,Inactive:1},
+					{region:"Khategaon",SHG:211,Active:204,Inactive:7},
+					{region:"Maheshwar",SHG:192,Active:189,Inactive:3},
+					{region:"Kannod",SHG:144,Active:144,Inactive:0}
+				];*/
+
+		//Width and height
+			var width = 400;
+			var height = 400;
+
+			var outerRadius = width / 2;
+			var innerRadius = 0;
+			var arc = d3.svg.arc()
+						.innerRadius(innerRadius)
+						.outerRadius(outerRadius);
+			
+			var pie = d3.layout.pie().value(function(d){return d.Groups;});
+			
+			//Easy colors accessible via a 10-step ordinal scale
+			var color = d3.scale.category20();
+			//Create SVG element
+			var svg = d3.select("#vis_container")
+						.append("svg")
+						.attr("width", width)
+						.attr("height", height);
+		// get the csv file data	
+		d3.csv("shgdistribution.csv",function(d){
+			return {
+				Groups : +d.Groups,
+				Active : +d.Active,
+				Inactive : +d.Inactive,
+				Region : d.Region
+			};
+		}, function(error,data){ 
+			if(error != null){
+				alert("Error!" + error);
+			}
+			else{
+				var fetched_data = data;
+				this.sum_data = d3.sum(data, function(d){return d.Groups;});
+				renderPie(fetched_data);
+			}
+			}
+		);	
+			
+		function renderPie(data){	
+			//Set up groups
+			console.log("sum data" + this.sum_data);
+			var arcs = svg.selectAll("g.arc")
+						  .data(pie(data))
+						  .enter()
+						  .append("g")
+						  .attr("class", "arc")
+						  .attr("transform", "translate(" + outerRadius + "," + outerRadius + ")");
+			
+			//Draw arc paths
+			arcs.append("path")
+			    .attr("fill", function(d) {return color(d.data.Region);})
+			    .attr("d", arc);
+			
+			//Labels
+			arcs.append("text")
+			    .attr("transform", function(d) {
+			    	return "translate(" + arc.centroid(d) + ")";
+			    })
+			    .attr("text-anchor", "middle")
+			    .text(function(d) {
+			    	var per_data = (d.data.Groups/sum_data) * 100;
+			    	return d.data.Region + per_data.toFixed(2) + "%";
+			    });
+
+			arcs.on("mouseover", function(d){
+				var details = d.data.Region + " has " + d.data.Groups +" groups. Out of these, " + d.data.Inactive + " are currently inactive."
+				document.getElementById("details").innerHTML = details;
+
+				d3.select("#details")
+					.transition().duration(200)
+					.style("text-align","center")
+					.style("opacity",1);
+			});
+
+			arcs.on("mouseout",function(d){
+				d3.select("#details")
+					.transition().duration(200)
+					.style("opacity",0);
+			});	
+		}
+								
+		</script>
+	</body>
+</html>

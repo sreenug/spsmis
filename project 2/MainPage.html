@@ -1,0 +1,179 @@
+<html>
+<head>
+<title>SHG Pragram Monitoring & Evaluation - Home Page</title>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script type="text/javascript" src="http://ils.unc.edu/courses/2014_fall/inls690_224/js/simple_statistics.js" charset="utf-8"></script>
+<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.9/crossfilter.js"></script>
+<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/dc/1.7.0/dc.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+<script type="text/javascript" src="maindashboard.js" charset="utf-8"></script>
+<script type="text/javascript" src="detailedReport.js" charset="utf-8"></script>
+<script type="text/javascript" src="monthlyReport.js" charset="utf-8"></script>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+	<style>
+		#textContent{
+			margin-left: 1000;
+			margin-top:-700;	 
+		}
+		#main_wrapper, #top_nav{
+			background: #ffffff;
+			width:80%;
+			margin:auto;
+			box-shadow:0 0 15px rgba(0, 0, 0, 0.25);
+			padding-top: 30px;
+		}
+		#vis_container{
+			height: 700;
+			width : 980;
+			margin-top: 50;
+		}
+	</style>
+	<header id="top_nav">
+		<h1> SHG Analytics Dashboard - Main</h1>
+	</header>
+	
+	<div id="main_wrapper">
+	
+	<span id ="dropdown">
+	<b>Select an option :</b>
+		<select id = "main_dropdown" onchange="selectOption(this.options[this.selectedIndex].value);">
+			<option value="Main DashBoard">Main Dashboard</option>
+			<option value="Monthly Report">Main Dashboard - Monthly Report</option>
+			<option value="Loans">Loans</option>
+			<option value="Special Loans">Special Loans</option>
+		</select>
+	</span>
+	<span id = "dropdown_region">
+			<b>Select Region:</b>
+			<select id = "region_dropdown" onchange="setRegion(this.options[this.selectedIndex].value);">
+				<option value="Select">--Select--</option>
+				<option value="Udainagar">Udainagar</option>
+				<option value="Kantaphod">Kantaphod</option>
+				<option value="Bagli">Bagli</option>
+				<option value="Barwah">Barwah</option>
+				<option value="Dewas">Dewas</option>
+				<option value="Khategaon">Khategaon</option>
+				<option value="Hatpipliya">Hatpipliya</option>
+				<option value="Maheshwar">Maheshwar</option>
+				<option value="Kannod">Kannod</option>
+			</select>
+	</span>
+	<span id="vis" style="display:block"></span>
+	<span id="vis_container" style="display:block">
+	</span>
+	<span id="vis_container_new">
+	</span>
+	<!-- Div for location legend-->
+	<span id = "legend">
+	</span>
+	</div>
+
+	<script>
+		pie_height = 300;
+		pie_width = 300;
+		pie_heightMonth = 200;
+		pie_widthMonth = 200;
+		margin = {top: 30, right: 20, bottom: 30, left: 50},
+		width = pie_width - margin.left - margin.right,
+		height = pie_height - margin.top - margin.bottom;
+		color = d3.scale.ordinal()
+				      .domain(["Udainagar", "Kantaphod", "Bagli","Barwah","Dewas","Khategaon","Hatpipliya","Maheshwar","Kannod"])
+				      .range(["#00441B", "##E5f5E0" , "#C7E9C0", "#A1D99B","#74C476","#41AB5D","#238B45","#006D2C","#00441B"]);
+
+		colorMonth = d3.scale.ordinal()
+				      .domain(["4","5","6"])
+				      .range(["#EED5B7","#CDB79E","#8B7D6B"]);		
+
+		radius = Math.min(pie_height,pie_width)/2;
+		radiusNew = Math.min(pie_heightMonth,pie_widthMonth)/2;
+		var data = [
+			{"location":"Udainagar","month":"04","clusters":12,"villages":82,"grampanchayat":46,"shgs":255,"activemembers":3835,"inactivemembers":38,"totalmembers":3862,"avg_mem_group":15,"total_saving":22244417,"avg_saving_member":5760,"total_fd":724900,"num_fd":810,"num_fd_members":684,"num_fd_groups":119,"groups_fd_total":1330000,"groups_fd_num":45,"groups_fd_num_groups":43,"cluster_fd_total":135000,"cluster_fd_num":10,"cluster_fd_num_clusters":10,"num_group_link_sps":30,"per_group_link_sps":12,"num_group_link_psds":51,"per_group_link_psds":20,"num_groups_repeat_loans_banks":179,"num_groups_repeat_loans_sps":30,"num_groups_repeat_loans_psds":22,"repeat_loan_total_amount":7040100,"accounts_open_total":2679},
+			{"location":"Kantaphod","month":"04","clusters":16,"villages":39,"grampanchayat":26,"shgs":245,"activemembers":4094,"inactivemembers":16,"totalmembers":4115,"avg_mem_group":17,"total_saving":31045073,"avg_saving_member":7544,"total_fd":1789000,"num_fd":1792,"num_fd_members":1751,"num_fd_groups":214,"groups_fd_total":5136500,"groups_fd_num":131,"groups_fd_num_groups":116,"cluster_fd_total":207000,"cluster_fd_num":14,"cluster_fd_num_clusters":14,"num_group_link_sps":0,"per_group_link_sps":0,"num_group_link_psds":16,"per_group_link_psds":7,"num_groups_repeat_loans_banks":47,"num_groups_repeat_loans_sps":48,"num_groups_repeat_loans_psds":3,"repeat_loan_total_amount":80880145,"accounts_open_total":3731},
+			{"location":"Bagli","month":"04","clusters":14,"villages":58,"grampanchayat":26,"shgs":259,"activemembers":3845,"inactivemembers":62,"totalmembers":3907,"avg_mem_group":15,"total_saving":25958963,"avg_saving_member":6644,"total_fd":537500,"num_fd":1083,"num_fd_members":754,"num_fd_groups":191,"groups_fd_total":5280000,"groups_fd_num":169,"groups_fd_num_groups":135,"cluster_fd_total":73628,"cluster_fd_num":4,"cluster_fd_num_clusters":4,"num_group_link_sps":11,"per_group_link_sps":4,"num_group_link_psds":15,"per_group_link_psds":6,"num_groups_repeat_loans_banks":190,"num_groups_repeat_loans_sps":18,"num_groups_repeat_loans_psds":4,"repeat_loan_total_amount":5066160,"accounts_open_total":2637},
+			{"location":"Barwah","month":"04","clusters":16,"villages":36,"grampanchayat":24,"shgs":243,"activemembers":3746,"inactivemembers":171,"totalmembers":3917,"avg_mem_group":16,"total_saving":27870834,"avg_saving_member":7115,"total_fd":1889200,"num_fd":2963,"num_fd_members":1671,"num_fd_groups":205,"groups_fd_total":3984000,"groups_fd_num":141,"groups_fd_num_groups":121,"cluster_fd_total":180000,"cluster_fd_num":13,"cluster_fd_num_clusters":13,"num_group_link_sps":39,"per_group_link_sps":16,"num_group_link_psds":76,"per_group_link_psds":31,"num_groups_repeat_loans_banks":155,"num_groups_repeat_loans_sps":39,"num_groups_repeat_loans_psds":9,"repeat_loan_total_amount":30729000,"accounts_open_total":2557},
+			{"location":"Dewas","month":"04","clusters":15,"villages":0,"grampanchayat":0,"shgs":248,"activemembers":4014,"inactivemembers":77,"totalmembers":4091,"avg_mem_group":16,"total_saving":30830717,"avg_saving_member":7536,"total_fd":1189100,"num_fd":1223,"num_fd_members":1101,"num_fd_groups":158,"groups_fd_total":4065198,"groups_fd_num":190,"groups_fd_num_groups":132,"cluster_fd_total":196000,"cluster_fd_num":12,"cluster_fd_num_clusters":12,"num_group_link_sps":17,"per_group_link_sps":7,"num_group_link_psds":88,"per_group_link_psds":35,"num_groups_repeat_loans_banks":154,"num_groups_repeat_loans_sps":92,"num_groups_repeat_loans_psds":7,"repeat_loan_total_amount":44988058,"accounts_open_total":3115},
+			{"location":"Khategaon","month":"04","clusters":12,"villages":24,"grampanchayat":19,"shgs":204,"activemembers":3009,"inactivemembers":46,"totalmembers":3057,"avg_mem_group":15,"total_saving":20527399,"avg_saving_member":6715,"total_fd":783500,"num_fd":1042,"num_fd_members":974,"num_fd_groups":150,"groups_fd_total":5251200,"groups_fd_num":145,"groups_fd_num_groups":101,"cluster_fd_total":339065,"cluster_fd_num":13,"cluster_fd_num_clusters":10,"num_group_link_sps":1,"per_group_link_sps":0.5,"num_group_link_psds":16,"per_group_link_psds":8,"num_groups_repeat_loans_banks":134,"num_groups_repeat_loans_sps":91,"num_groups_repeat_loans_psds":4,"repeat_loan_total_amount":50088979,"accounts_open_total":2441},
+			{"location":"Hatpipliya","month":"04","clusters":13,"villages":53,"grampanchayat":33,"shgs":216,"activemembers":3348,"inactivemembers":0,"totalmembers":3348,"avg_mem_group":16,"total_saving":18610979,"avg_saving_member":5526,"total_fd":213500,"num_fd":244,"num_fd_members":214,"num_fd_groups":57,"groups_fd_total":1783918,"groups_fd_num":57,"groups_fd_num_groups":52,"cluster_fd_total":149334,"cluster_fd_num":10,"cluster_fd_num_clusters":10,"num_group_link_sps":5,"per_group_link_sps":2,"num_group_link_psds":75,"per_group_link_psds":35,"num_groups_repeat_loans_banks":114,"num_groups_repeat_loans_sps":5,"num_groups_repeat_loans_psds":17,"repeat_loan_total_amount":21008096,"accounts_open_total":2115},
+			{"location":"Maheshwar","month":"04","clusters":6,"villages":22,"grampanchayat":18,"shgs":186,"activemembers":2508,"inactivemembers":33,"totalmembers":2541,"avg_mem_group":14,"total_saving":9040350,"avg_saving_member":3558,"total_fd":179000,"num_fd":229,"num_fd_members":229,"num_fd_groups":37,"groups_fd_total":104000,"groups_fd_num":4,"groups_fd_num_groups":4,"cluster_fd_total":26000,"cluster_fd_num":4,"cluster_fd_num_clusters":4,"num_group_link_sps":1,"per_group_link_sps":1,"num_group_link_psds":93,"per_group_link_psds":50,"num_groups_repeat_loans_banks":2,"num_groups_repeat_loans_sps":62,"num_groups_repeat_loans_psds":47,"repeat_loan_total_amount":13932700,"accounts_open_total":1205},
+			{"location":"Kannod","month":"04","clusters":4,"villages":28,"grampanchayat":18,"shgs":134,"activemembers":1783,"inactivemembers":0,"totalmembers":1783,"avg_mem_group":13,"total_saving":8147862,"avg_saving_member":4570,"total_fd":254500,"num_fd":317,"num_fd_members":310,"num_fd_groups":50,"groups_fd_total":1703462,"groups_fd_num":58,"groups_fd_num_groups":47,"cluster_fd_total":40501,"cluster_fd_num":3,"cluster_fd_num_clusters":3,"num_group_link_sps":0,"per_group_link_sps":0,"num_group_link_psds":20,"per_group_link_psds":15,"num_groups_repeat_loans_banks":46,"num_groups_repeat_loans_sps":0,"num_groups_repeat_loans_psds":4,"repeat_loan_total_amount":8130600,"accounts_open_total":953},
+			{"location":"Udainagar","month":"05","clusters":12,"villages":82,"grampanchayat":46,"shgs":255,"activemembers":3835,"inactivemembers":38,"totalmembers":3862,"avg_mem_group":15,"total_saving":22244417,"avg_saving_member":5760,"total_fd":724900,"num_fd":810,"num_fd_members":684,"num_fd_groups":119,"groups_fd_total":1330000,"groups_fd_num":45,"groups_fd_num_groups":43,"cluster_fd_total":135000,"cluster_fd_num":10,"cluster_fd_num_clusters":10,"num_group_link_sps":30,"per_group_link_sps":12,"num_group_link_psds":51,"per_group_link_psds":20,"num_groups_repeat_loans_banks":179,"num_groups_repeat_loans_sps":30,"num_groups_repeat_loans_psds":22,"repeat_loan_total_amount":7040100,"accounts_open_total":2679},
+			{"location":"Kantaphod","month":"05","clusters":16,"villages":39,"grampanchayat":26,"shgs":245,"activemembers":4094,"inactivemembers":16,"totalmembers":4115,"avg_mem_group":17,"total_saving":31045073,"avg_saving_member":7544,"total_fd":1789000,"num_fd":1792,"num_fd_members":1751,"num_fd_groups":214,"groups_fd_total":5136500,"groups_fd_num":131,"groups_fd_num_groups":116,"cluster_fd_total":207000,"cluster_fd_num":14,"cluster_fd_num_clusters":14,"num_group_link_sps":0,"per_group_link_sps":0,"num_group_link_psds":16,"per_group_link_psds":7,"num_groups_repeat_loans_banks":47,"num_groups_repeat_loans_sps":48,"num_groups_repeat_loans_psds":3,"repeat_loan_total_amount":80880145,"accounts_open_total":3731},
+			{"location":"Bagli","month":"05","clusters":14,"villages":58,"grampanchayat":26,"shgs":259,"activemembers":3845,"inactivemembers":62,"totalmembers":3907,"avg_mem_group":15,"total_saving":25958963,"avg_saving_member":6644,"total_fd":537500,"num_fd":1083,"num_fd_members":754,"num_fd_groups":191,"groups_fd_total":5280000,"groups_fd_num":169,"groups_fd_num_groups":135,"cluster_fd_total":73628,"cluster_fd_num":4,"cluster_fd_num_clusters":4,"num_group_link_sps":11,"per_group_link_sps":4,"num_group_link_psds":15,"per_group_link_psds":6,"num_groups_repeat_loans_banks":190,"num_groups_repeat_loans_sps":18,"num_groups_repeat_loans_psds":4,"repeat_loan_total_amount":5066160,"accounts_open_total":2637},
+			{"location":"Barwah","month":"05","clusters":16,"villages":36,"grampanchayat":24,"shgs":243,"activemembers":3746,"inactivemembers":171,"totalmembers":3917,"avg_mem_group":16,"total_saving":27870834,"avg_saving_member":7115,"total_fd":1889200,"num_fd":2963,"num_fd_members":1671,"num_fd_groups":205,"groups_fd_total":3984000,"groups_fd_num":141,"groups_fd_num_groups":121,"cluster_fd_total":180000,"cluster_fd_num":13,"cluster_fd_num_clusters":13,"num_group_link_sps":39,"per_group_link_sps":16,"num_group_link_psds":76,"per_group_link_psds":31,"num_groups_repeat_loans_banks":155,"num_groups_repeat_loans_sps":39,"num_groups_repeat_loans_psds":9,"repeat_loan_total_amount":30729000,"accounts_open_total":2557},
+			{"location":"Dewas","month":"05","clusters":15,"villages":0,"grampanchayat":0,"shgs":248,"activemembers":4014,"inactivemembers":77,"totalmembers":4091,"avg_mem_group":16,"total_saving":30830717,"avg_saving_member":7536,"total_fd":1189100,"num_fd":1223,"num_fd_members":1101,"num_fd_groups":158,"groups_fd_total":4065198,"groups_fd_num":190,"groups_fd_num_groups":132,"cluster_fd_total":196000,"cluster_fd_num":12,"cluster_fd_num_clusters":12,"num_group_link_sps":17,"per_group_link_sps":7,"num_group_link_psds":88,"per_group_link_psds":35,"num_groups_repeat_loans_banks":154,"num_groups_repeat_loans_sps":92,"num_groups_repeat_loans_psds":7,"repeat_loan_total_amount":44988058,"accounts_open_total":3115},
+			{"location":"Khategaon","month":"05","clusters":12,"villages":24,"grampanchayat":19,"shgs":204,"activemembers":3009,"inactivemembers":46,"totalmembers":3057,"avg_mem_group":15,"total_saving":20527399,"avg_saving_member":6715,"total_fd":783500,"num_fd":1042,"num_fd_members":974,"num_fd_groups":150,"groups_fd_total":5251200,"groups_fd_num":145,"groups_fd_num_groups":101,"cluster_fd_total":339065,"cluster_fd_num":13,"cluster_fd_num_clusters":10,"num_group_link_sps":1,"per_group_link_sps":0.5,"num_group_link_psds":16,"per_group_link_psds":8,"num_groups_repeat_loans_banks":134,"num_groups_repeat_loans_sps":91,"num_groups_repeat_loans_psds":4,"repeat_loan_total_amount":50088979,"accounts_open_total":2441},
+			{"location":"Hatpipliya","month":"05","clusters":13,"villages":53,"grampanchayat":33,"shgs":216,"activemembers":3348,"inactivemembers":0,"totalmembers":3348,"avg_mem_group":16,"total_saving":18610979,"avg_saving_member":5526,"total_fd":213500,"num_fd":244,"num_fd_members":214,"num_fd_groups":57,"groups_fd_total":1783918,"groups_fd_num":57,"groups_fd_num_groups":52,"cluster_fd_total":149334,"cluster_fd_num":10,"cluster_fd_num_clusters":10,"num_group_link_sps":5,"per_group_link_sps":2,"num_group_link_psds":75,"per_group_link_psds":35,"num_groups_repeat_loans_banks":114,"num_groups_repeat_loans_sps":5,"num_groups_repeat_loans_psds":17,"repeat_loan_total_amount":21008096,"accounts_open_total":2115},
+			{"location":"Maheshwar","month":"05","clusters":6,"villages":22,"grampanchayat":18,"shgs":186,"activemembers":2508,"inactivemembers":33,"totalmembers":2541,"avg_mem_group":14,"total_saving":9040350,"avg_saving_member":3558,"total_fd":179000,"num_fd":229,"num_fd_members":229,"num_fd_groups":37,"groups_fd_total":104000,"groups_fd_num":4,"groups_fd_num_groups":4,"cluster_fd_total":26000,"cluster_fd_num":4,"cluster_fd_num_clusters":4,"num_group_link_sps":1,"per_group_link_sps":1,"num_group_link_psds":93,"per_group_link_psds":50,"num_groups_repeat_loans_banks":2,"num_groups_repeat_loans_sps":62,"num_groups_repeat_loans_psds":47,"repeat_loan_total_amount":13932700,"accounts_open_total":1205},
+			{"location":"Kannod","month":"05","clusters":4,"villages":28,"grampanchayat":18,"shgs":134,"activemembers":1783,"inactivemembers":0,"totalmembers":1783,"avg_mem_group":13,"total_saving":8147862,"avg_saving_member":4570,"total_fd":254500,"num_fd":317,"num_fd_members":310,"num_fd_groups":50,"groups_fd_total":1703462,"groups_fd_num":58,"groups_fd_num_groups":47,"cluster_fd_total":40501,"cluster_fd_num":3,"cluster_fd_num_clusters":3,"num_group_link_sps":0,"per_group_link_sps":0,"num_group_link_psds":20,"per_group_link_psds":15,"num_groups_repeat_loans_banks":46,"num_groups_repeat_loans_sps":0,"num_groups_repeat_loans_psds":4,"repeat_loan_total_amount":8130600,"accounts_open_total":953},
+			{"location":"Udainagar","month":"06","clusters":12,"villages":82,"grampanchayat":46,"shgs":255,"activemembers":3835,"inactivemembers":38,"totalmembers":3862,"avg_mem_group":15,"total_saving":22244417,"avg_saving_member":5760,"total_fd":724900,"num_fd":810,"num_fd_members":684,"num_fd_groups":119,"groups_fd_total":1330000,"groups_fd_num":45,"groups_fd_num_groups":43,"cluster_fd_total":135000,"cluster_fd_num":10,"cluster_fd_num_clusters":10,"num_group_link_sps":30,"per_group_link_sps":12,"num_group_link_psds":51,"per_group_link_psds":20,"num_groups_repeat_loans_banks":179,"num_groups_repeat_loans_sps":30,"num_groups_repeat_loans_psds":22,"repeat_loan_total_amount":7040100,"accounts_open_total":2679},
+			{"location":"Kantaphod","month":"06","clusters":16,"villages":39,"grampanchayat":26,"shgs":245,"activemembers":4094,"inactivemembers":16,"totalmembers":4115,"avg_mem_group":17,"total_saving":31045073,"avg_saving_member":7544,"total_fd":1789000,"num_fd":1792,"num_fd_members":1751,"num_fd_groups":214,"groups_fd_total":5136500,"groups_fd_num":131,"groups_fd_num_groups":116,"cluster_fd_total":207000,"cluster_fd_num":14,"cluster_fd_num_clusters":14,"num_group_link_sps":0,"per_group_link_sps":0,"num_group_link_psds":16,"per_group_link_psds":7,"num_groups_repeat_loans_banks":47,"num_groups_repeat_loans_sps":48,"num_groups_repeat_loans_psds":3,"repeat_loan_total_amount":80880145,"accounts_open_total":3731},
+			{"location":"Bagli","month":"06","clusters":14,"villages":58,"grampanchayat":26,"shgs":259,"activemembers":3845,"inactivemembers":62,"totalmembers":3907,"avg_mem_group":15,"total_saving":25958963,"avg_saving_member":6644,"total_fd":537500,"num_fd":1083,"num_fd_members":754,"num_fd_groups":191,"groups_fd_total":5280000,"groups_fd_num":169,"groups_fd_num_groups":135,"cluster_fd_total":73628,"cluster_fd_num":4,"cluster_fd_num_clusters":4,"num_group_link_sps":11,"per_group_link_sps":4,"num_group_link_psds":15,"per_group_link_psds":6,"num_groups_repeat_loans_banks":190,"num_groups_repeat_loans_sps":18,"num_groups_repeat_loans_psds":4,"repeat_loan_total_amount":5066160,"accounts_open_total":2637},
+			{"location":"Barwah","month":"06","clusters":16,"villages":36,"grampanchayat":24,"shgs":243,"activemembers":3746,"inactivemembers":171,"totalmembers":3917,"avg_mem_group":16,"total_saving":27870834,"avg_saving_member":7115,"total_fd":1889200,"num_fd":2963,"num_fd_members":1671,"num_fd_groups":205,"groups_fd_total":3984000,"groups_fd_num":141,"groups_fd_num_groups":121,"cluster_fd_total":180000,"cluster_fd_num":13,"cluster_fd_num_clusters":13,"num_group_link_sps":39,"per_group_link_sps":16,"num_group_link_psds":76,"per_group_link_psds":31,"num_groups_repeat_loans_banks":155,"num_groups_repeat_loans_sps":39,"num_groups_repeat_loans_psds":9,"repeat_loan_total_amount":30729000,"accounts_open_total":2557},
+			{"location":"Dewas","month":"06","clusters":15,"villages":0,"grampanchayat":0,"shgs":248,"activemembers":4014,"inactivemembers":77,"totalmembers":4091,"avg_mem_group":16,"total_saving":30830717,"avg_saving_member":7536,"total_fd":1189100,"num_fd":1223,"num_fd_members":1101,"num_fd_groups":158,"groups_fd_total":4065198,"groups_fd_num":190,"groups_fd_num_groups":132,"cluster_fd_total":196000,"cluster_fd_num":12,"cluster_fd_num_clusters":12,"num_group_link_sps":17,"per_group_link_sps":7,"num_group_link_psds":88,"per_group_link_psds":35,"num_groups_repeat_loans_banks":154,"num_groups_repeat_loans_sps":92,"num_groups_repeat_loans_psds":7,"repeat_loan_total_amount":44988058,"accounts_open_total":3115},
+			{"location":"Khategaon","month":"06","clusters":12,"villages":24,"grampanchayat":19,"shgs":204,"activemembers":3009,"inactivemembers":46,"totalmembers":3057,"avg_mem_group":15,"total_saving":20527399,"avg_saving_member":6715,"total_fd":783500,"num_fd":1042,"num_fd_members":974,"num_fd_groups":150,"groups_fd_total":5251200,"groups_fd_num":145,"groups_fd_num_groups":101,"cluster_fd_total":339065,"cluster_fd_num":13,"cluster_fd_num_clusters":10,"num_group_link_sps":1,"per_group_link_sps":0.5,"num_group_link_psds":16,"per_group_link_psds":8,"num_groups_repeat_loans_banks":134,"num_groups_repeat_loans_sps":91,"num_groups_repeat_loans_psds":4,"repeat_loan_total_amount":50088979,"accounts_open_total":2441},
+			{"location":"Hatpipliya","month":"06","clusters":13,"villages":53,"grampanchayat":33,"shgs":216,"activemembers":3348,"inactivemembers":0,"totalmembers":3348,"avg_mem_group":16,"total_saving":18610979,"avg_saving_member":5526,"total_fd":213500,"num_fd":244,"num_fd_members":214,"num_fd_groups":57,"groups_fd_total":1783918,"groups_fd_num":57,"groups_fd_num_groups":52,"cluster_fd_total":149334,"cluster_fd_num":10,"cluster_fd_num_clusters":10,"num_group_link_sps":5,"per_group_link_sps":2,"num_group_link_psds":75,"per_group_link_psds":35,"num_groups_repeat_loans_banks":114,"num_groups_repeat_loans_sps":5,"num_groups_repeat_loans_psds":17,"repeat_loan_total_amount":21008096,"accounts_open_total":2115},
+			{"location":"Maheshwar","month":"06","clusters":6,"villages":22,"grampanchayat":18,"shgs":186,"activemembers":2508,"inactivemembers":33,"totalmembers":2541,"avg_mem_group":14,"total_saving":9040350,"avg_saving_member":3558,"total_fd":179000,"num_fd":229,"num_fd_members":229,"num_fd_groups":37,"groups_fd_total":104000,"groups_fd_num":4,"groups_fd_num_groups":4,"cluster_fd_total":26000,"cluster_fd_num":4,"cluster_fd_num_clusters":4,"num_group_link_sps":1,"per_group_link_sps":1,"num_group_link_psds":93,"per_group_link_psds":50,"num_groups_repeat_loans_banks":2,"num_groups_repeat_loans_sps":62,"num_groups_repeat_loans_psds":47,"repeat_loan_total_amount":13932700,"accounts_open_total":1205},
+			{"location":"Kannod","month":"06","clusters":4,"villages":28,"grampanchayat":18,"shgs":134,"activemembers":1783,"inactivemembers":0,"totalmembers":1783,"avg_mem_group":13,"total_saving":8147862,"avg_saving_member":4570,"total_fd":254500,"num_fd":317,"num_fd_members":310,"num_fd_groups":50,"groups_fd_total":1703462,"groups_fd_num":58,"groups_fd_num_groups":47,"cluster_fd_total":40501,"cluster_fd_num":3,"cluster_fd_num_clusters":3,"num_group_link_sps":0,"per_group_link_sps":0,"num_group_link_psds":20,"per_group_link_psds":15,"num_groups_repeat_loans_banks":46,"num_groups_repeat_loans_sps":0,"num_groups_repeat_loans_psds":4,"repeat_loan_total_amount":8130600,"accounts_open_total":953}
+		];
+
+	var data_filter = data.filter(function(d){return d.month == "06";});	
+
+	function selectOption(dropdown_value){
+		if(dropdown_value == "Main DashBoard"){
+			d3.selectAll("svg").remove();
+			document.getElementById("dropdown_region").style.display="inline";
+			filterData(data_filter);
+		}
+		else if(dropdown_value == "Loans"){
+			d3.selectAll("svg").remove();
+			window.location = "Loans.html";
+			console.log("Dropdown value : " +dropdown_value );
+		}
+		else if(dropdown_value == "Special Loans"){
+			d3.selectAll("svg").remove();
+			console.log("Dropdown value : " +dropdown_value );
+		}
+		else if(dropdown_value == "Monthly Report"){
+			d3.selectAll("svg").remove();
+			console.log("Dropdown value : " +dropdown_value );
+			document.getElementById("dropdown_region").style.display ="none";
+			monthlyReport();
+		}
+		else{
+			d3.selectAll("svg").remove();
+			console.log("Dropdown value : " +dropdown_value );
+		}
+	}
+
+
+	function setRegion(dropdown_value_region){
+		if(dropdown_value_region == "Select"){
+			console.log("Value not Selected");
+		}
+		else{
+			//document.getElementById("submitForm").style.display="block";
+			console.log("Selected Value : " +dropdown_value_region);
+			detailedReport(dropdown_value_region);
+		}
+	}
+
+	function detailedReport(region){
+
+		if((region != "Select")){
+			console.log(region);
+			detailedReportMain(region);
+		}
+		else{
+			alert("Missing required information");
+		}
+	}
+
+
+
+
+	filterData(data_filter);
+	</script>
+	 
+</body>

@@ -1,0 +1,92 @@
+	h1 {
+			text-align : center;
+		}
+	h3{
+		margin-left: 300;
+		margin-top:-20;
+	}
+
+	body{
+		background: #dddcd7;
+	}	
+	#vis_container{
+		margin-top : 50;
+		margin-left :10;
+	}
+	.x-axis path, .y-axis path, .x-axis line, .y-axis line{
+			fill: none;
+			stroke: grey;
+			stroke-width: 1;
+			shape-rendering: crispEdges;
+		}
+
+	.text{
+			font-family: sans-serif;
+			font-size: 10px;
+			fill: black;
+	}
+		.d3-tip {
+		  line-height: 1;
+		  font-weight: normal;
+		  padding: 2px;
+		  background: rgba(0, 0, 0, 0.3);
+		  color: #fff;
+		  border-radius: 2px;
+		}
+
+		.d3-tip:after {
+		  box-sizing: border-box;
+		  display: inline;
+		  font-size: 6px;
+		  width: 100%;
+		  line-height: 1;
+		  color: rgba(0, 0, 0, 0.3);
+		  content: "\25BC";
+		  position: absolute;
+		  text-align: center;
+		}
+
+		.d3-tip.n:after {
+		  margin: -1px 0 0 0;
+		  top: 100%;
+		  left: 0;
+		}
+		
+		#textContentMember{
+			margin-left: 265;
+			 
+		}
+		
+		#loans_number{
+			margin-left:20;
+		}
+		.rect_legend:hover,.rect:hover{
+			opacity: 0.5;
+		}
+		
+		#top_nav{
+
+			border-bottom: 5px solid #047d0a;
+			padding-top: 10px;
+		}
+		#dropdown_selection,#dropdown,#dropdown_region{
+			margin-left:30;
+		}
+
+		path{
+  			stroke: white;
+  			stroke-width: 1px;
+		}
+		
+		.textTitle{
+			font-family: sans-serif;
+			font-size: 25px;
+			font-weight: bold;
+			fill:black;
+		}
+		.textHeader{
+			font-family: sans-serif;
+			font-size: 20px;
+			font-weight: bold;
+			fill:grey;
+		}
